@@ -3,7 +3,6 @@ module.exports = {
     clientId: "id_bot",
 
     guildId: "id_serveur_support",
-    clientId: "id_client",
 
     BotClose: false, // put true if you want only you can do the orders
 
