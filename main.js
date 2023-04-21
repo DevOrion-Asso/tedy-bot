@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
+
 const client = new Client({
     intents: [
         GatewayIntentBits.GuildPresences,
@@ -10,11 +11,7 @@ const client = new Client({
     ]
 });
 
-module.exports = client;
-
-client.config = require('./data/config');
-
-client.login(client.config.token);
+client.config = require("./data/config");
 
 const fs = require("node:fs"),
     path = require("node:path"),
@@ -22,11 +19,15 @@ const fs = require("node:fs"),
 
 const { DeploySlashCommands } = require("./data/dep-commands");
 DeploySlashCommands(
+    client.config.guildId,
     client.config.clientId,
     client.config.token
 );
 
+module.exports = client,
+
 client.commands = new Collection();
+client.modals = new Collection();
 
 client.login(client.config.token);
 
@@ -56,3 +57,18 @@ for (const file of commandFiles) {
         console.log(colors.yellow('[WARNING]') + " " + colors.magenta(`The command ar ${filePath} is missing a required "data" or "execute" proprety.`));
     };
 };
+
+
+const modals = fs.readdirSync(`./modals/`).filter(file => file.endsWith('.js'));
+
+for (let file of modals) {
+
+    let pull = require(`./modals/${file}`);
+    if (pull.id) {
+        client.modals.set(pull.id, pull);
+        console.log(colors.green('[SUCCES]') + " " + `Loaded a ${file} file !`)
+    } else {
+        console.log(colors.yellow('[WARNING]') + " " + `Couldn't load a ${file} file !`)
+        continue;
+    }
+}
