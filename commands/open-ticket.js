@@ -1,14 +1,24 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('open-ticket')
 		.setDescription('Vous permet d\'ouvrir un ticket sur le Discord !'),
-	async execute(client, interaction) {
-        interaction.reply({
-            content: `${client.config.emojiNo} Pour le moment, l'ouverture de ticket sur le **Discord** n'est pas possible.`,
-            ephemeral: true
-        });
+	async execute(client, interaction, db) {
+        const modal = new ModalBuilder()
+            .setCustomId(`createTicketModal`)
+            .setTitle('Créer un ticket');
+
+        const something = new TextInputBuilder()
+            .setCustomId(`object`)
+            .setLabel("Objet de votre ticket ici")
+            .setStyle(TextInputStyle.Short);
+
+        const ActionRow = new ActionRowBuilder().addComponents(something);
+
+        modal.addComponents(ActionRow);
+
+        await interaction.showModal(modal);
 	},
 };
