@@ -58,7 +58,6 @@ for (const file of commandFiles) {
     };
 };
 
-
 const modals = fs.readdirSync(`./modals/`).filter(file => file.endsWith('.js'));
 
 for (let file of modals) {
@@ -71,4 +70,4 @@ for (let file of modals) {
         console.log(colors.yellow('[WARNING]') + " " + `Couldn't load a ${file} file !`)
         continue;
     }
-}
+};
