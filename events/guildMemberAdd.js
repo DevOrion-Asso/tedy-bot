@@ -8,11 +8,11 @@ module.exports = {
 	name: Events.GuildMemberAdd,
 	once: false,
 	async execute(member) {
-        const channel = member.guild.channels.cache.find(channel => channel.id === '998374421800689735');
+        const channel = member.guild.channels.cache.find(channel => channel.id === 'id_salon_bienvenue');
 
-        //member.roles.add('998366139946115162').catch(error => {});
+        member.roles.add('id_role_membre').catch(error => {});
 
-        if (!channel) channel.send({
+        if (channel) channel.send({
             embeds: [
                 new EmbedBuilder()
                     .setColor('Blurple')
