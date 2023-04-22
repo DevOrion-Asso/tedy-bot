@@ -8,9 +8,9 @@ module.exports = {
 	name: Events.GuildMemberAdd,
 	once: true,
 	async execute(member) {
-        const channel = member.guild.channels.cache.find(channel => channel.id === '998374421800689735');
+        const channel = member.guild.channels.cache.find(channel => channel.id === 'id_salon_au_revoir');
 
-        if (!channel) channel.send({
+        if (channel) channel.send({
             embeds: [
                 new EmbedBuilder()
                     .setColor('Red')
