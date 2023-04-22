@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, Events, EmbedBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
+const ytdl = require('ytdl-core');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -13,10 +14,10 @@ module.exports = {
                     { name: 'guildMemberAdd', value: 'guildmemberadd' },
                     { name: 'guildMemberRemove', value: 'guildmemberremove' },
                 )),
-	async execute(client, interaction) {
+	async execute(client, interaction, db) {
 		const event = interaction.options.getString("select-event");
 
-		if (interaction.user.id !== "id_owner_bot") return interaction.reply({
+		if (interaction.user.id !== "owner_id") return interaction.reply({
 			embeds: [
 				new EmbedBuilder()
 					.setColor('Red')
@@ -47,6 +48,6 @@ module.exports = {
 				],
 				ephemeral: true
 			});
-		};
+		}
 	},
 };
