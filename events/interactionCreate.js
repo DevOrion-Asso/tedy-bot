@@ -7,6 +7,9 @@ const { BotClose } = require("../data/config");
 
 const client = require("../main");
 
+const { QuickDB } = require("quick.db");
+const db = new QuickDB();
+
 module.exports = {
 	name: Events.InteractionCreate,
 	once: false,
@@ -20,7 +23,7 @@ module.exports = {
             }
         
             try {
-                if (BotClose == true && interaction.user.id !== "id_owner_bot") {
+                if (db.get('bot_close') == true && interaction.user.id !== "574544938440851466") {
                     await interaction.deferReply({ ephemeral: true });
                     await wait(2000);
     
@@ -28,12 +31,12 @@ module.exports = {
                         embeds: [
                             new EmbedBuilder()
                                 .setColor('Red')
-                                .setDescription(':x: Bot blocked, only developer can use the bot !')
+                                .setDescription(`${client.emoji.no} Bot accessible seulement au développeur !\n> *Bot en maintenance...<:TedyGene:998366963606765589>*`)
                         ],
                         ephemeral: true
                     })
                 } else {
-                    await command.execute(client, interaction);
+                    await command.execute(client, interaction, db);
                 };
             } catch (error) {
                 console.log(colors.magenta('[ERROR]') + "\n" + colors.red(error));
@@ -42,7 +45,7 @@ module.exports = {
                     embeds: [
                         new EmbedBuilder()
                             .setColor('Red')
-                            .setDescription(`:x: An error occurred while running the command \`${interaction.commandName}\` !`)
+                            .setDescription(`${client.emoji.no} An error occurred while running the command \`${interaction.commandName}\` !`)
                             .addFields([
                                 {
                                     name: "> Error :",
@@ -59,18 +62,18 @@ module.exports = {
             const modal = client.modals.get(interaction.customId);
         
             if (!modal) return interaction.reply({
-              embeds: [
-                new EmbedBuilder()
-                  .setDescription('Something went wrong... Probably the Modal ID is not defined in the modals handler.')
-                  .setColor('Red')
-              ],
-              ephemeral: true
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} Une erreur est survenue lors du lancement du **modal** !`)
+                ],
+                ephemeral: true
             });
         
             try {
-              modal.run(client, interaction);
+                modal.run(client, interaction, db);
             } catch (e) {
-              console.error(e)
+                console.error(e)
             };
         }
 	},
