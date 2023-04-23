@@ -20,7 +20,7 @@ module.exports = {
             embeds: [
                 new EmbedBuilder()
                     .setColor('Red')
-                    .setDescription(`${client.config.emojiNo} Vous devez avoir la permission \`Administrator\` pour faire cette commande !`)
+                    .setDescription(`${client.emoji.no} Vous devez avoir la permission \`Administrator\` pour faire cette commande !`)
             ],
             ephemeral: true
         });
@@ -82,7 +82,7 @@ module.exports = {
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Green')
-                        .setDescription(`${client.config.emojiYes} Le bot est désormais en maintenance !`)
+                        .setDescription(`${client.emoji.yes} Le bot est désormais en maintenance !`)
                 ],
                 ephemeral: true
             });
@@ -93,7 +93,7 @@ module.exports = {
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Green')
-                        .setDescription(`${client.config.emojiYes} Le bot est désormais réouvert au publique !`)
+                        .setDescription(`${client.emoji.yes} Le bot est désormais réouvert au publique !`)
                 ],
                 ephemeral: true
             });
@@ -102,7 +102,7 @@ module.exports = {
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Green')
-                        .setDescription(`${client.config.emojiYes} Vous avez éteins le bot !`)
+                        .setDescription(`${client.emoji.yes} Vous avez éteins le bot !`)
                 ],
                 ephemeral: true
             });
