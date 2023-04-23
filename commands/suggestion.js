@@ -124,10 +124,10 @@ module.exports = {
                 ephemeral: true
             });
 
-            const id = interaction.options.getString("id");
+            const id = interaction.options.getString("suggest-id");
             const comment = interaction.options.getString('comment') ?? "Aucun commentaire fournis.";
 
-            if (!db.get(`suggest_${id}`)) return interaction.reply({
+            if (!await db.get(`suggest_${id}`)) return interaction.reply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Red')
@@ -187,10 +187,10 @@ module.exports = {
                 ephemeral: true
             });
 
-            const id = interaction.options.getString("id");
+            const id = interaction.options.getString("suggest-id");
             const comment = interaction.options.getString('comment') ?? "Aucun commentaire fournis.";
 
-            if (!db.get(`suggest_${id}`)) return interaction.reply({
+            if (!await db.get(`suggest_${id}`)) return interaction.reply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Red')
@@ -200,11 +200,13 @@ module.exports = {
             });
 
             const data = {
-                author: db.get(`suggest_${id}.author`),
-                authorAvatarURL: db.get(`suggest_${id}.avatar`),
-                content: db.get(`suggest_${id}.content`),
-                message: db.get(`suggest_${id}.message`)
+                author: await db.get(`suggest_${id}.author`),
+                authorAvatarURL: await db.get(`suggest_${id}.avatar`),
+                content: await db.get(`suggest_${id}.content`),
+                message: await db.get(`suggest_${id}.message`)
             };
+
+            console.log(data.message);
 
             const auteur = client.users.cache.get(data.author);
 
