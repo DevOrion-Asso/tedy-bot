@@ -12,17 +12,15 @@ const client = new Client({
 });
 
 client.config = require("./data/config");
+client.emoji = require("./data/emojis");
 
 const fs = require("node:fs"),
     path = require("node:path"),
     colors = require("colors/safe");
 
-const { DeploySlashCommands } = require("./data/dep-commands");
-DeploySlashCommands(
-    client.config.guildId,
-    client.config.clientId,
-    client.config.token
-);
+require("./data/dep-commands").DeploySlashCommands(client.config.clientId, client.config.token);
+
+//require('./handling').handler(client);
 
 module.exports = client,
 
