@@ -102,6 +102,8 @@ module.exports = {
                 statut: false
             });
 
+            console.log(await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.tasks));
+
             const data = {
                 channelid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.channel_embed_id`),
                 messageid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.message_embed_id`),
@@ -111,7 +113,8 @@ module.exports = {
             client.channels.cache.get(data.channelid).messages.fetch(data.messageid).then(message => {
                 const new_embed = new EmbedBuilder()
                     .setColor('Orange')
-                    .setTitle(`Tâches de ${interaction.user.id}`)
+                        .setTitle(`Tâche de ${interaction.user.tag}`)
+                        .setThumbnail(interaction.user.avatarURL({ dynamic: true, format: "webp" }))
                 
                 for (let i = 0; i < data.tasks.lenght; i++) {
                     let statut;
