@@ -5,29 +5,52 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('bot')
 		.setDescription('Permet de faire des actions pour le bot !')
-        .addStringOption(option =>
-            option.setName('select-action')
-                .setDescription('Choisissez ce que vous voulez faire !')
-                .setRequired(true)
-                .addChoices(
-                    { name: 'infos', value: 'infos' },
-                    { name: 'down', value: 'down' },
-                    { name: 'close', value: 'close' },
-                    { name: 'open', value: 'open' }
-                )),
+        .addSubcommandGroup(subcommandGroup =>
+            subcommandGroup
+                .setName('infos')
+                .setDescription('Voir les informations du bot')
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('afficher')
+                        .setDescription('Affiche toutes les informations du bot')))
+        .addSubcommandGroup(subcommandGroup =>
+            subcommandGroup
+                .setName('action')
+                .setDescription('Effectuer une action sur le bot')
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('reload')
+                        .setDescription('Permet de recharger une commande')
+                        .addStringOption(option =>
+                            option
+                                .setName('commande-name')
+                                .setDescription('Tapez le nom de la commande')
+                                .setRequired(true)))
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('dow')
+                        .setDescription('Permet d\'éteindre le bot'))
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('close')
+                        .setDescription('Permet de mettre en maintenance le bot'))
+                .addSubcommand(subcommand =>
+                    subcommand
+                        .setName('open')
+                        .setDescription('Permet '))),
 	async execute(client, interaction, db) {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return interaction.reply({
+        if (interaction.user.id !== client.config.ownerBot) return interaction.reply({
             embeds: [
                 new EmbedBuilder()
                     .setColor('Red')
-                    .setDescription(`${client.emoji.no} Vous devez avoir la permission \`Administrator\` pour faire cette commande !`)
+                    .setDescription(`${client.emoji.no} Seul le développeur du bot peut faire cette commande !`)
             ],
             ephemeral: true
         });
 
-        const option = interaction.options.getString('select-action');
+        const subcmdgroup = interaction.options.getSubcommandGroup();
 
-        if (option == "infos") {
+        if (subcmdgroup == 'infos') {
             let totalSeconds = (client.uptime / 1000);
             let days = Math.floor(totalSeconds / 86400);
             totalSeconds %= 86400;
@@ -64,7 +87,7 @@ module.exports = {
                                 },
                                 {
                                     name: "Développeur :",
-                                    value: `> ${développeur} / [**DevOrion Developer Team**](https://github.com/orgs/DevOrion-Korp/teams/equipe-developpement)`,
+                                    value: `> **${développeur.tag}** / [**DevOrion Developer Team**](https://github.com/orgs/DevOrion-Korp/)`,
                                     inline: true
                                 },
                                 {
@@ -75,39 +98,92 @@ module.exports = {
                         )
                 ]
             });
-        } else if (option == "close") {
-            await db.set("bot_close", true);
+        } else if (subcmdgroup == 'action') {
+            const subcmd = interaction.options.getSubcommand();
 
-            interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor('Green')
-                        .setDescription(`${client.emoji.yes} Le bot est désormais en maintenance !`)
-                ],
-                ephemeral: true
-            });
-        } else if (option == "open") {
-            await db.delete("bot_close");
+            if (subcmd == 'reload') {
+                const commandName = interaction.options.getString('commande-name', true).toLowerCase();
+                const command = interaction.client.commands.get(commandName);
+        
+                if (!command) {
+                    return interaction.reply({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setColor('Red')
+                                .setDescription(`${client.emoji.no} Aucune commande correspond à \`${commandName}\` !`)
+                        ],
+                        ephemeral: true
+                    })
+                } else {
+                    delete require.cache[require.resolve(`./${command.data.name}.js`)];
 
-            interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor('Green')
-                        .setDescription(`${client.emoji.yes} Le bot est désormais réouvert au publique !`)
-                ],
-                ephemeral: true
-            });
-        } else if (option == "down") {
-            interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor('Green')
-                        .setDescription(`${client.emoji.yes} Vous avez éteins le bot !`)
-                ],
-                ephemeral: true
-            });
+                    try {
+                        interaction.client.commands.delete(command.data.name);
+                        const newCommand = require(`./${command.data.name}.js`);
+                        interaction.client.commands.set(newCommand.data.name, newCommand);
 
-            process.exit();
+                        await interaction.reply({
+                            embeds: [
+                                new EmbedBuilder()
+                                    .setColor('Green')
+                                    .setDescription(`${client.emoji.yes} La commande \`${newCommand.data.name}\` a bien été rechargé !`)
+                            ],
+                            ephemeral: true
+                        });
+                    } catch (error) {
+                        console.error(error);
+                        await interaction.reply({
+                            embeds: [
+                                new EmbedBuilder()
+                                    .setColor('Red')
+                                    .setDescription(`${client.emoji.no} Une erreur s'est produite lors du rechargement de la commande \`${command.data.name}\` !`)
+                                    .addFields(
+                                        [
+                                            {
+                                                name: "> Erreur :",
+                                                value: "```diff\n" + `- ${error.message}` + "\n```"
+                                            }
+                                        ]
+                                    )
+                            ],
+                            ephemeral: true
+                        });
+                    };
+                };
+            } else if (subcmd == 'close') {
+                await db.set("bot_close", true);
+    
+                interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Green')
+                            .setDescription(`${client.emoji.yes} Le bot est désormais en maintenance !`)
+                    ],
+                    ephemeral: true
+                });
+            } else if (subcmd == 'open') {
+                await db.delete("bot_close");
+    
+                interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Green')
+                            .setDescription(`${client.emoji.yes} Le bot est désormais réouvert au publique !`)
+                    ],
+                    ephemeral: true
+                });
+            } else if (subcmd == 'down') {
+                interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Green')
+                            .setDescription(`${client.emoji.yes} Vous avez éteins le bot !`)
+                    ],
+                    ephemeral: true
+                });
+    
+                process.exit();
+            };
         };
 	},
 };

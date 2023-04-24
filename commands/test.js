@@ -17,11 +17,11 @@ module.exports = {
 	async execute(client, interaction, db) {
 		const event = interaction.options.getString("select-event");
 
-		if (interaction.user.id !== "owner_id") return interaction.reply({
+		if (interaction.user.id !== "574544938440851466") return interaction.reply({
 			embeds: [
 				new EmbedBuilder()
 					.setColor('Red')
-					.setDescription(`${client.config.emojiNo} Vous devez être le développeur du bot pour faire cette commande !`)
+					.setDescription(`${client.emoji.no} Vous devez être le développeur du bot pour faire cette commande !`)
 			],
 			ephemeral: true
 		})
@@ -33,7 +33,7 @@ module.exports = {
 				embeds: [
 					new EmbedBuilder()
 						.setColor('Green')
-						.setDescription(`${client.config.emojiYes} Lancement de \`${event}\` réussi !`)
+						.setDescription(`${client.emoji.yes} Lancement de \`${event}\` réussi !`)
 				],
 				ephemeral: true
 			});
@@ -44,7 +44,7 @@ module.exports = {
 				embeds: [
 					new EmbedBuilder()
 						.setColor('Green')
-						.setDescription(`${client.config.emojiYes} Lancement de \`${event}\` réussi !`)
+						.setDescription(`${client.emoji.yes} Lancement de \`${event}\` réussi !`)
 				],
 				ephemeral: true
 			});
