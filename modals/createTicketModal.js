@@ -9,7 +9,7 @@ module.exports = {
             const channel = await interaction.guild.channels.create({
                 name: `ticket-${interaction.user.id}`,
                 type: ChannelType.GuildText,
-                parent: "1099341180090732615",
+                parent: client.config.categorieTicket,
                 permissionOverwrites: [
                     {
                         id: interaction.guild.id,
@@ -24,7 +24,7 @@ module.exports = {
                         ],
                     },
                     {
-                        id: "1099159524813832243",
+                        id: client.config.supportTicketRole,
                         allow: [
                             PermissionsBitField.Flags.ViewChannel
                         ],
@@ -64,6 +64,8 @@ module.exports = {
                     row
                 ]
             }).then(async msg => {
+                msg.pin();
+
                 await db.set("rolereact_message", msg.id);
 
                 const collector = msg.channel.createMessageComponentCollector();
@@ -86,7 +88,7 @@ module.exports = {
                                 ],
                             },
                             {
-                                id: "1099159524813832243",
+                                id: client.config.supportTicketRole,
                                 allow: [
                                     PermissionsBitField.Flags.ViewChannel
                                 ],
