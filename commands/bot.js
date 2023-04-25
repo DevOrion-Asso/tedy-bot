@@ -7,14 +7,6 @@ module.exports = {
 		.setDescription('Permet de faire des actions pour le bot !')
         .addSubcommandGroup(subcommandGroup =>
             subcommandGroup
-                .setName('infos')
-                .setDescription('Voir les informations du bot')
-                .addSubcommand(subcommand =>
-                    subcommand
-                        .setName('afficher')
-                        .setDescription('Affiche toutes les informations du bot')))
-        .addSubcommandGroup(subcommandGroup =>
-            subcommandGroup
                 .setName('action')
                 .setDescription('Effectuer une action sur le bot')
                 .addSubcommand(subcommand =>
@@ -28,7 +20,7 @@ module.exports = {
                                 .setRequired(true)))
                 .addSubcommand(subcommand =>
                     subcommand
-                        .setName('dow')
+                        .setName('down')
                         .setDescription('Permet d\'éteindre le bot'))
                 .addSubcommand(subcommand =>
                     subcommand
@@ -37,59 +29,11 @@ module.exports = {
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName('open')
-                        .setDescription('Permet '))),
+                        .setDescription('Permet de rouvrir le bot aux membres'))),
 	async execute(client, interaction, db) {
         const subcmdgroup = interaction.options.getSubcommandGroup();
 
-        if (subcmdgroup == 'infos') {
-            let totalSeconds = (client.uptime / 1000);
-            let days = Math.floor(totalSeconds / 86400);
-            totalSeconds %= 86400;
-            let hours = Math.floor(totalSeconds / 3600);
-            totalSeconds %= 3600;
-            let minutes = Math.floor(totalSeconds / 60);
-            let seconds = Math.floor(totalSeconds % 60);
-            
-            let uptime = `**${days}** jour(s), **${hours}** heure(s), **${minutes}** minute(s) et **${seconds}** seconde(s)`;
-
-            const développeur = client.users.cache.get('574544938440851466');
-
-            interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor('#b83dba')
-                        .setTitle(`Informations sur le bot`)
-                        .setThumbnail(client.user.avatarURL({ dynamic: true, format: "webp" }))
-                        .addFields(
-                            [
-                                {
-                                    name: "Client :",
-                                    value: `> **${client.user.tag}**\n> ${client.user}\n> \`${client.user.id}\``,
-                                    inline: true
-                                },
-                                {
-                                    name: "Structure :",
-                                    value: `> **Discord.js@${version}**\n> <:slash_command:1095694892111503481> Pris en charge`,
-                                    inline: true
-                                },
-                                {
-                                    name: "** **",
-                                    value: `** **`,
-                                },
-                                {
-                                    name: "Développeur :",
-                                    value: `> **${développeur.tag}** / [**DevOrion Developer Team**](https://github.com/orgs/DevOrion-Korp/)`,
-                                    inline: true
-                                },
-                                {
-                                    name: "Uptime du bot :",
-                                    value: `> ${uptime}`,
-                                }
-                            ]
-                        )
-                ]
-            });
-        } else if (subcmdgroup == 'action') {
+        if (subcmdgroup == 'action') {
             const subcmd = interaction.options.getSubcommand();
 
             if (subcmd == 'reload') {
@@ -199,7 +143,7 @@ module.exports = {
                     ],
                     ephemeral: true
                 });
-                
+
                 interaction.reply({
                     embeds: [
                         new EmbedBuilder()
