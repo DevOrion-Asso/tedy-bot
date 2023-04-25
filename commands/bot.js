@@ -39,15 +39,6 @@ module.exports = {
                         .setName('open')
                         .setDescription('Permet '))),
 	async execute(client, interaction, db) {
-        if (interaction.user.id !== client.config.ownerBot) return interaction.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor('Red')
-                    .setDescription(`${client.emoji.no} Seul le développeur du bot peut faire cette commande !`)
-            ],
-            ephemeral: true
-        });
-
         const subcmdgroup = interaction.options.getSubcommandGroup();
 
         if (subcmdgroup == 'infos') {
@@ -102,6 +93,15 @@ module.exports = {
             const subcmd = interaction.options.getSubcommand();
 
             if (subcmd == 'reload') {
+                if (interaction.user.id !== client.config.ownerBot) return interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Red')
+                            .setDescription(`${client.emoji.no} Seul le développeur du bot peut faire cette commande !`)
+                    ],
+                    ephemeral: true
+                });
+                
                 const commandName = interaction.options.getString('commande-name', true).toLowerCase();
                 const command = interaction.client.commands.get(commandName);
         
@@ -151,6 +151,15 @@ module.exports = {
                     };
                 };
             } else if (subcmd == 'close') {
+                if (interaction.user.id !== client.config.ownerBot) return interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Red')
+                            .setDescription(`${client.emoji.no} Seul le développeur du bot peut faire cette commande !`)
+                    ],
+                    ephemeral: true
+                });
+                
                 await db.set("bot_close", true);
     
                 interaction.reply({
@@ -162,6 +171,15 @@ module.exports = {
                     ephemeral: true
                 });
             } else if (subcmd == 'open') {
+                if (interaction.user.id !== client.config.ownerBot) return interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Red')
+                            .setDescription(`${client.emoji.no} Seul le développeur du bot peut faire cette commande !`)
+                    ],
+                    ephemeral: true
+                });
+                
                 await db.delete("bot_close");
     
                 interaction.reply({
@@ -173,6 +191,15 @@ module.exports = {
                     ephemeral: true
                 });
             } else if (subcmd == 'down') {
+                if (interaction.user.id !== client.config.ownerBot) return interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Red')
+                            .setDescription(`${client.emoji.no} Seul le développeur du bot peut faire cette commande !`)
+                    ],
+                    ephemeral: true
+                });
+                
                 interaction.reply({
                     embeds: [
                         new EmbedBuilder()
