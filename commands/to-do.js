@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, Embed } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 
+const { addFieldsEmbed } = require("../data/functions");
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('to-do')
@@ -34,16 +36,12 @@ module.exports = {
             .addSubcommand(subcommand =>
               subcommand
                 .setName('edit')
-                .setDescription('Permet de refuser une suggestion !')
+                .setDescription('Valider une tâche !')
                 .addStringOption(option =>
                     option
                         .setName('task-id')
                         .setDescription('Définissez l\'identifiant de la tâche !')
-                        .setRequired(true))
-                .addStringOption(option =>
-                    option
-                        .setName('new-content')
-                        .setDescription('Définissez le nouveau contenue de la tâche !')))),
+                        .setRequired(true)))),
 	async execute(client, interaction, db) {
         if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return interaction.reply({
             embeds: [
@@ -56,8 +54,11 @@ module.exports = {
 
         const subcmd = interaction.options.getSubcommand();
 
+        const userdbtodo = await db.get(`todo_${interaction.guild.id}_${interaction.user.id}`);
+        const list = await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`);
+
         if (subcmd == 'create') {
-            if (await !db.get(`todo_${interaction.guild.id}_${interaction.user.id}`)) return interaction.reply({
+            if (userdbtodo) return interaction.reply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Red')
@@ -93,8 +94,26 @@ module.exports = {
                 });
             });
         } else if (subcmd == 'add') {
+            if (!userdbtodo) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} Vous n'avez pas configuré votre ebed !\n> \`/to-do action create\``)
+                ],
+                ephemeral: true
+            });
+            
             const new_task = interaction.options.getString('content');
             const id = Math.floor(Math.random() * (999999 - 300 + 1)) + 300;
+
+            if (list.length == 25) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} Vous avez la limite de **25 tâche** !`)
+                ],
+                ephemeral: true
+            });
 
             await db.push(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`, {
                 id: id,
@@ -102,38 +121,89 @@ module.exports = {
                 statut: false
             });
 
-            console.log(await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.tasks));
+            const new_list = await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`);
 
             const data = {
                 channelid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.channel_embed_id`),
                 messageid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.message_embed_id`),
-                tasks: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`)
             };
 
+            const embed = new EmbedBuilder()
+                .setColor(0xb83dba)
+                .setTitle(`Tâche de ${interaction.user.tag}`)
+                .setThumbnail(interaction.user.avatarURL({ dynamic: true, format: "webp" }))
+
+            addFieldsEmbed(client, new_list, embed);
+
             client.channels.cache.get(data.channelid).messages.fetch(data.messageid).then(message => {
-                const new_embed = new EmbedBuilder()
-                    .setColor('Orange')
-                        .setTitle(`Tâche de ${interaction.user.tag}`)
-                        .setThumbnail(interaction.user.avatarURL({ dynamic: true, format: "webp" }))
-                
-                for (let i = 0; i < data.tasks.lenght; i++) {
-                    let statut;
-                    if (data.tasks[i].statut == false) {
-                        statut = client.emoji.no;
-                    } else {
-                        statut = client.emoji.yes;
-                    };
+                message.edit({
+                    embeds: [
+                        embed
+                    ]
+                });
 
-                    new_embed.addFields(
-                        [
-                            {
-                                name: `> ${statut} Tâche id \`${data.tasks[i].id}\` :`,
-                                value: `${data.tasks[i].content}`
-                            }
-                        ]
-                    )
-                };
+                interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Green')
+                            .setDescription(`${client.emoji.yes} Tâche bien ajouté !`)
+                    ],
+                    ephemeral: true
+                });
+            });
+        } else if (subcmd == 'edit') {
+            const task_id = parseInt(interaction.options.getString('task-id'));
 
+            if (!userdbtodo) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} Vous n'avez pas configuré votre ebed !\n> \`/to-do action create\``)
+                ],
+                ephemeral: true
+            });
+
+            if (list.length < 1) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} Vous n'avez pas de tâche !\n> \`/to-do action add\``)
+                ],
+                ephemeral: true
+            });
+
+            let object = list.find(object => object.id === task_id);
+
+            if (!object) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} L'ID \`${task_id}\` correspond à aucune tâche !`)
+                ],
+                ephemeral: true
+            });
+
+            if (object) {
+                object.statut = true;
+            };
+
+            await db.set(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`, list);
+
+            const new_list = await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`);
+
+            const data = {
+                channelid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.channel_embed_id`),
+                messageid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.message_embed_id`),
+            };
+
+            const new_embed = new EmbedBuilder()
+                .setColor(0xb83dba)
+                .setTitle(`Tâche de ${interaction.user.tag}`)
+                .setThumbnail(interaction.user.avatarURL({ dynamic: true, format: "webp" }))
+
+            addFieldsEmbed(client, new_list, new_embed);
+
+            client.channels.cache.get(data.channelid).messages.fetch(data.messageid).then(message => {
                 message.edit({
                     embeds: [
                         new_embed
@@ -144,7 +214,75 @@ module.exports = {
                     embeds: [
                         new EmbedBuilder()
                             .setColor('Green')
-                            .setDescription(`${client.emoji.yes} Tâche bien ajouté !`)
+                            .setDescription(`${client.emoji.yes} Tâche bien modifié !`)
+                    ],
+                    ephemeral: true
+                });
+            });
+        } else if (subcmd == 'delete') {
+            const task_id = parseInt(interaction.options.getString('task-id'));
+
+            if (!userdbtodo) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} Vous n'avez pas configuré votre ebed !\n> \`/to-do action create\``)
+                ],
+                ephemeral: true
+            });
+
+            if (list.length < 1) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} Vous n'avez pas de tâche !\n> \`/to-do action add\``)
+                ],
+                ephemeral: true
+            });
+
+            let index = list.findIndex(objet => objet.id === task_id);
+
+            if (!index) return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`${client.emoji.no} L'ID \`${task_id}\` correspond à aucune tâche !`)
+                ],
+                ephemeral: true
+            });
+
+            if (index !== -1) {
+                list.splice(index, 1);
+            };
+
+            await db.set(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`, list);
+
+            const new_list = await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.tasks`);
+
+            const data = {
+                channelid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.channel_embed_id`),
+                messageid: await db.get(`todo_${interaction.guild.id}_${interaction.user.id}.message_embed_id`),
+            };
+
+            const new_embed = new EmbedBuilder()
+                .setColor(0xb83dba)
+                .setTitle(`Tâche de ${interaction.user.tag}`)
+                .setThumbnail(interaction.user.avatarURL({ dynamic: true, format: "webp" }))
+
+            addFieldsEmbed(client, new_list, new_embed);
+
+            client.channels.cache.get(data.channelid).messages.fetch(data.messageid).then(message => {
+                message.edit({
+                    embeds: [
+                        new_embed
+                    ]
+                });
+
+                interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Green')
+                            .setDescription(`${client.emoji.yes} Tâche bien supprimé !`)
                     ],
                     ephemeral: true
                 });
