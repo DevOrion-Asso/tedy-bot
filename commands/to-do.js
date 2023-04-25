@@ -240,9 +240,9 @@ module.exports = {
                 ephemeral: true
             });
 
-            let index = list.findIndex(objet => objet.id === task_id);
+            let object = list.find(object => object.id === task_id);
 
-            if (!index) return interaction.reply({
+            if (!object) return interaction.reply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Red')
@@ -250,6 +250,8 @@ module.exports = {
                 ],
                 ephemeral: true
             });
+
+            let index = list.findIndex(objet => objet.id === task_id);
 
             if (index !== -1) {
                 list.splice(index, 1);
