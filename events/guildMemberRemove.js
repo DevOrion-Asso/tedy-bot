@@ -4,6 +4,8 @@ const colors = require("colors/safe");
 
 const config = require("../data/config");
 
+const client = require("../main");
+
 module.exports = {
 	name: Events.GuildMemberRemove,
 	once: false,
