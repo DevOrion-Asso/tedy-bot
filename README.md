@@ -17,7 +17,7 @@ module.exports = {
     token: "token",
     clientId: "id_bot",
 
-    ownerBot: "574544938440851466",
+    ownerBot: "id_owner_bot",
 
     guildId: "id_serveur_support",
     suggestChannel: "id_salon_suggestion",
